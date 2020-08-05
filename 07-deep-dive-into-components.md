@@ -7,10 +7,10 @@ For example, the render method:
 - renders the list of `Person`s, 
 - and also manages the button component. 
 
-The render method should be rather lean and contain not too much JSX.
+The render method should be rather clean and contain not too much JSX.
 
 For example, we might want to create a `Person` list component. 
-This way we'd outsource a lot of code and get a leaner `render()` method. 
+This way we'd outsource a lot of code and get a cleaner `render()` method. 
 Another improvement is to outsoucrse our cockpit into its own component. 
 
 **The goal: have a more focused App component as well as a more focused components in general.**
@@ -39,21 +39,22 @@ Take the time to fix these to work with the new file structure.
 ### Splitting the app into components
 
 `Persons.js` can be a functional component, because we don't need to manage state. 
-In order to create it, we'll copy the map method we used in `App.js`, and ajust it like so: 
+In order to create it, we'll copy the map method we used in `App.js`, and adjust it like so: 
 
 ```javascript
 import React from 'react';
 import Person from './Person/Person';
 
 const persons = (props) => (props.persons.map((person, index) => {
-	return <Person key={person.id}
-			click={() => props.clicked(index)} 
-            name={person.name} age={person.age} 
-            location={person.location}
-            changed={(event) => props.changed(event, person.id)} />
-    })
-
-);
+	return <Person 
+		key={person.id}
+		click={() => props.clicked(index)} 
+		name={person.name} 
+		age={person.age} 
+		location={person.location}
+		changed={(event) => props.changed(event, person.id)} 
+	/>
+}));
 
 export default persons;
 ```
@@ -218,7 +219,9 @@ Core foundations of a good react app:
 
 ### Component Lifecycle
 
-When react creates a component for us (instanciate and renders a component), it runs through multiple lifecycle phases. We can define methods in stateful component (only in stateful components) which react will execute, which allows us to run some code during some of these lifecycle methods. 
+When react creates a component for us (instanciate and renders a component), it runs through multiple lifecycle phases. 
+
+We can define methods in stateful component (only in stateful components) which react will execute, which allows us to run some code during some of these lifecycle methods. 
 
 ![alt text](img/component-lifecycle.png "File tree structure")
 
@@ -226,31 +229,37 @@ Not all methods are executed during creation.
 
 #### Methods executed during component creation: 
 
-- **constructor(props)**: 
+1. **constructor(props)**: 
 	- This is executed first. This is a default ES6 feature. 
-	- React creates the component, and passes any props this component received to the constructor. 
-	- If we implement the constructor method we need to call `super(props)` and pass on props. 
-		- This calls the constructor of the parent class. The parent class is the Component object we imported from react. 
+	- React creates the component, and passes any props this component received to the constructor(). 
+	- If we implement the constructor() method we need to call `super(props)` and pass on props. 
+		- This calls the constructor() of the **parent class**. 
+			- The parent class is the Component object we imported from react. 
 		- By calling super() and passing props, things like `this.`. 
 		- We may also intialize the state in the constructor. 
 	- Never cause side-effects (eg reaching out to a web server). 
-		- We should not do that in the constructor, because it might lead to re-rendering of the app, or the state becoming unpredictable. 
+		- We should not do that in the constructor, 
+			- because it might lead to **re-rendering** of the app, 
+			- or the state becoming unpredictable. 
 
-- **componentWillMount()**: 
+2. **componentWillMount()**: 
 	- This method is executed next. It is defined by react. 
-	- It exists for historic reasons, mainly. We don't really use it anymore. 
-	- If used, it's used to update state or do last minute optimization, but we still don't want to cause side effects by calling a web server. 
+	- It exists for historic reasons, mainly. We don't really use it anymore. If used, it's used to 
+		- update state or do last minute optimization, 
+		- but we still don't want to cause side effects by calling a web server. 
 	- Chances are we won't implement it in our app. 
 
-- **render** : 
-	- This executed next. This doesn't access the real DOM (we'll cover this later in the course). 
-	- This method gives react an idea of what is should look like if it then reaches out to the real DOM and manipulates it. - The render() method clearly defines how your app should look like from an HTML perspective. 
+3. **render()** : 
+	- This executed next. 
+	- This doesn't access the real DOM (we'll cover this later in the course). 
+	- This method gives react an idea of what is should look like if it then reaches out to the real DOM and manipulates it. 
+	- The render() method clearly defines how your app should look like from an HTML perspective. 
 	- Once we call `render()` and define our JSX code, react knows which components we included, so it will then go ahead and renders child components. 
 
-- **componentDidMount()**: 
-	- Basically tells you that this component was successfully mounted. 
+4. **componentDidMount()**: 
+	- Basically tells you that this component was **successfully mounted**. 
 	- This can cause Side effects. 
-		- For example if we fetch data from the web we shouldn't set state in component did mount. 
+		- For example if we fetch data from the web we shouldn't set state in componentDidMount(). 
 		- This will trigger re-rendering. 
 
 If we need access to a lifecycle method, we need to have a **stateful component**. 
@@ -271,11 +280,14 @@ import Person from './Person/Person';
 class Persons extends Component {
 	render() {
 		return this.props.persons.map((person, index) => {
-			return <Person key={person.id}
+			return <Person 
+				key={person.id}
 				click={() => this.props.clicked(index)} 
-	            name={person.name} age={person.age} 
+	            name={person.name} 
+				age={person.age} 
 	            location={person.location}
-	            changed={(event) => this.props.changed(event, person.id)} />
+	            changed={(event) => this.props.changed(event, person.id)} 
+			/>
     	})
 	}
 }
@@ -286,6 +298,7 @@ export default Persons;
 Do the same for the `Person` component.
 
 Now that both components are changed, we can implement **Lifecycle hooks**. 
+
 Creating these methods inside `App.js` will overide reacts default implementations, 
 and will allow us to see the order of execution in the console: 
 
@@ -326,30 +339,31 @@ As soon as we click `toggle persons` we'll be able to see the console changes:
 
 React creates functional components the same way, but there we can't add our own methods to see this. 
 
+
 ### Update triggered by parent (changing props)
 
 ![alt text](img/component-lifecycle-triggered-by-parent.png "Component lifecycle: update triggered by parent")
 
 
-- **componentWillReceiveProps(nextProps):** 
+1. **componentWillReceiveProps(nextProps):** 
 	- This method is the first to be executed. 
 	- One thing we can do is synchronise our local state to the component props. 
 	- Don't cause side effects by reaching out to a webserver to fetch data, 
 		- because this will lead to rerendering and perfomance issues. 
 
-- **shouldComponentUpdate(nextProps, nextState):** 
+2. **shouldComponentUpdate(nextProps, nextState):** 
 	- This method may cancel the updating process. 
-	- In all the other methods we don't return anything, but in this one we can return true or false. 
+	- In all the other methods we don't return anything, but in this one we can **return true or false**. 
 		- Returning false can improve performance. 
 	- As always, we shouldn't cause side effects. 
 
-- **componentWillUpdate(nextProps, nextState):** 
+3. **componentWillUpdate(nextProps, nextState):** 
 	- Here we also get access to upcoming props and state. 
 	- again, we might sync our state to props. 
 	- We also shouldn't cause side effects here as well. 
-- **render():** 
-- **Update all child components**
-- **componentDidUpdate()**: 
+4. **render():** 
+5. **Update all child components**
+6. **componentDidUpdate()**: 
 	- Here we can cause side effects, 
 	- we shouldn't update state since it might trigger re-rendering. 
 
@@ -409,11 +423,11 @@ This is just about the same process as before, with one difference:
 
 The logic for the next steps is the same as before: 
 
-- **shouldComponentUpdate(nextProps, nextState)**
-- **componentWillUpdate(nextProps, nextState)** 
-- **render()** 
-- **Update all child components**
-- **componentDidUpdate()**
+1. **shouldComponentUpdate(nextProps, nextState)**
+2. **componentWillUpdate(nextProps, nextState)** 
+3. **render()** 
+4. **Update all child components**
+5. **componentDidUpdate()**
 
 Let's implement this in `App.js`, where we change the state. This is how the console looks after implementation: 
 
@@ -452,14 +466,17 @@ We shouldn't use Pure component everywhere.
 
 ### Rendering and Updates
 
-- Updating in React happen from **top to bottom**, and only if the state or props change. 
-- Since update is done top to bottom, we can put `shouldComponentUpdate` as high as possible in the tree in a container. 
+- Updating in React happens from **top to bottom**, and only if the state or props change. 
+- Since update is done top to bottom, we can put `shouldComponentUpdate` **as high as possible** in the tree in a container. 
 - This way the child elements won't update if there's not change. 
 
 ![alt text](img/rendering-and-update.png "Rendering and update: container and components tree")
 
 React automatically optimizes this updating process by not hitting the real DOM all the time. 
+
 There's a big difference between the `render()` method being called and the real DOM being changed. 
+
+
 
 ### How does React update the real DOM? 
 
@@ -479,12 +496,14 @@ There's a big difference between the `render()` method being called and the real
 - React keeps 2 copies: 
 	- the old virtual DOM version
 	- the rerendered version which is the one that gets created when the `render()` method is called. 
-	- React compares both versions. 
-		- If it can detect a different, 
-			- it updates the **real DOM**only in the places where a change has been made. 
-		- If it doesn't detect a difference 
-			- the **real DOM** isn't touched. 
-		- Accessing the DOM is really slow. We want to do this as little as possible. 
+- React compares both versions. 
+	- If it can detect a different, 
+		- it updates the **real DOM** only in the places where a change has been made. 
+	- If it doesn't detect a difference 
+		- the **real DOM** isn't touched. 
+	- Accessing the DOM is really slow. We want to do this as little as possible. 
+
+
 
 ### Returning ajacent elements 
 
@@ -494,7 +513,7 @@ This restriction is loosened in react 16 (for example, in `map()` we're returnin
 
 #### Returning an array: 
 
-Similarly we could return an array of elements in `Person.js`, like so: 
+Similarly we could return an **array** of elements in `Person.js`, like so: 
 
 ```javascript
 return [
@@ -532,140 +551,147 @@ Note, we need to add a unique id to each element, otherwise we'll get a console 
 
 ### Understanding HOC's
 
-- We'll often use HOC's when using third party packages. 
-	We'll need them to add a certain logic to our components. 
-	Some logic we may need in a number of component, that we don't want to add to each component individually. 
+We'll often use HOC's when using third party packages. 
 
-- For example, we're wrapping our returned items in a div that applies the className `classes.style` in two places. 
-It would be better to do this more efficiently. 
+We'll need them to add a certain logic to our components. 
+- Some logic we may need in a number of component, that we don't want to add to each component individually. 
+
+For example, we're wrapping our returned items in a div that applies the className `classes.style` in two places. 
+
+- It would be better to do this more efficiently. 
 We can create a HOC to do this for us.
-	- First approach:  
-		- Create a file `WithClass.js` inside the folder `hoc`
-		- receive props of class name
-		- apply class to wrapping div
-		- return {props.children} inbetween the div 
 
-		```javascript
-		import React from 'react';
+**First approach:**  
+- Create a file `WithClass.js` inside the folder `hoc`
+- receive props of class name
+- apply class to wrapping div
+- return {props.children} inbetween the div 
 
-		const withClass = (props) => (
-			<div className={props.classes}>
-				{props.children}
+```javascript
+import React from 'react';
+
+const withClass = (props) => (
+	<div className={props.classes}>
+		{props.children}
+	</div>
+);
+
+export default withClass;
+```
+
+- We can then import and use it inside `Person` and `App`, like so: 
+
+```javascript
+return (
+	<WithClass classes={classes.Person} >
+		<p onClick={this.props.click}>I am {this.props.name} and I am {this.props.age} year old! I live in {this.props.location}!</p>
+		<p>{this.props.children}</p>
+		<input type="text" onChange={this.props.changed} />
+	</WithClass>
+);
+```
+
+**Second approach:**  
+- Create a file `withClass.js` inside the folder `hoc`
+- receive arguments `WrappedComponent`, and `className`
+- return function which receives props and will render it to something 
+- use the function to alter `App.js` in the export statement
+
+```javascript
+import React from 'react';
+
+const withClass = (WrappedComponent, className) => {
+	return (props) => (
+		<div className={className}>
+			<WrappedComponent />
+		</div>
+	)
+}
+
+export default withClass;
+```
+
+- Inside `App.js`: 
+
+```javascript
+return (
+	<Aux>
+		<Cockpit 
+			appTitle={this.props.title}
+			clicked={this.togglePersonsHandler} 
+			persons={this.state.persons}
+			showPersons={this.state.showPersons} 
+		/>
+		{persons}
+	</Aux>
+);
+
+export default withClass(App, classes.App);
+```
+
+- In this example, we used `Aux` to add a wrapping div around our returned items, and then used the function `withClass` with the arguments `App` and `classes.App` in order to apply the styling to `App`. 
+
+- The app looks good on first look, but the functionality was lost with this change. 
+	- All the props are missing on our props components. 
+	- The reason for this is we're outputing wrapped components, but wrapped components could be either `App.js` or `Person.js`. 
+
+- The way to resolve this is to pass on the existing props. 
+	- This works thanks to an ES6 operator: `spread` (`...`)
+	- Props are an object of key value pairs, so we could pass this object into the function, like so: 
+
+	```javascript
+	import React from 'react';
+
+	const withClass = (WrappedComponent, className) => {
+		return (props) => (
+			<div className={className}>
+				<WrappedComponent {...props} />
 			</div>
-		);
+		)
+	}
 
-		export default withClass;
-		```
+	export default withClass;
+	```
 
-		- We can then import and use it inside `Person` and `App`, like so: 
+- This higher order component doesn't have to return a functional component. 
+If we need access to lifecycle hooks, we could return a **class (stateful component)**, like so: 
 
-		```javascript
-		return (
-			<WithClass classes={classes.Person} >
-				<p onClick={this.props.click}>I am {this.props.name} and I am {this.props.age} year old! I live in {this.props.location}!</p>
-				<p>{this.props.children}</p>
-				<input type="text" onChange={this.props.changed} />
-			</WithClass>
-		);
-		```
+```javascript
+import React, { Component } from 'react';
 
-	- Second approach:  
-		- Create a file `withClass.js` inside the folder `hoc`
-		- receive arguments `WrappedComponent`, and `className`
-		- return function which receives props and will render it to something 
-		- use the function to alter `App.js` in the export statement
-
-		```javascript
-		import React from 'react';
-
-		const withClass = (WrappedComponent, className) => {
-			return (props) => (
+const withClass = (WrappedComponent, className) => {
+	return class extends Component {
+		render() {
+			return (
 				<div className={className}>
-					<WrappedComponent />
+					<WrappedComponent {...this.props} />
 				</div>
 			)
 		}
+	}
+}
 
-		export default withClass;
-		```
-
-		- Inside `App.js`: 
-
-		```javascript
-		return (
-			<Aux>
-				<Cockpit 
-				appTitle={this.props.title}
-				clicked={this.togglePersonsHandler} 
-				persons={this.state.persons}
-				showPersons={this.state.showPersons} />
-				{persons}
-			</Aux>
-			);
-			}
-		}
-
-		export default withClass(App, classes.App);
-		```
-
-		- In this example, we used `AUX` to add a wrapping div around our returned items, and then used the function `withClass` with the arguments `App` and `classes.App` in order to apply the styling to `App`. 
-
-		- The app looks good on first look, but the functionality was lost with this change. 
-			- All the props are missing on our props components. 
-			- The reason for this is we're outputing wrapped components, but wrapped components could be either `App.js` or `Person.js`. 
-
-		- The way to resolve this is to pass on the existing props. 
-			- This works thanks to an ES6 operator: `spread` (`...`)
-			- Props are an object of key value pairs, so we could pass this object into the function, like so: 
-
-			```javascript
-			import React from 'react';
-
-			const withClass = (WrappedComponent, className) => {
-				return (props) => (
-					<div className={className}>
-						<WrappedComponent {...props} />
-					</div>
-				)
-			}
-
-			export default withClass;
-			```
-
-		- This higher order component doesn't have to return a functional component. If we need access to lifecycle hooks, we could return a **class (stateful component)**, like so: 
-
-		```javascript
-		import React, { Component } from 'react';
-
-		const withClass = (WrappedComponent, className) => {
-			return class extends Component {
-				render() {
-					return (
-						<div className={className}>
-							<WrappedComponent {...this.props} />
-						</div>
-					)
-				}
-			}
-		}
-
-		export default withClass;
-		```
-		- This returns an anonymus class. We have a function that returns a class on demand, so the class name doesn't matter. 
+export default withClass;
+```
+- This returns an anonymus class. We have a function that returns a class on demand, so the class name doesn't matter. 
 
 
 
 ### Passing unknown props
 
 Say we want to count the time `togglePersonHandler` is clicked. 
+
 We'll start by adding a new key to our state, and assigning it to `0`. 
+
 Once we've done that, we might want to update the counter inside `togglePersonHandler` like so: 
 
 ```javascript
 togglePersonsHandler = (event, id) => {
-  const doesShow = this.state.showPersons;
-  this.setState( { showPersons: ! doesShow,
-                    toggleClicked: this.state.toggleClicked + 1});
+	const doesShow = this.state.showPersons;
+	this.setState( { 
+		showPersons: ! doesShow,
+		toggleClicked: this.state.toggleClicked + 1
+	});
 }
 ```
 
@@ -681,7 +707,7 @@ togglePersonsHandler = (event, id) => {
 const doesShow = this.state.showPersons;
 this.setState( (prevState, props) => { 
   return {
-    showPersons: !doesShow,
+    showPersons: ! doesShow,
     toggleClicked: prevState.toggleClicked + 1
   }
 });
@@ -693,11 +719,13 @@ this.setState( (prevState, props) => {
 
 ### Validating props
 
-We also have a better way to handle props. This is useful if your code is handeled by other devs. 
-We can inforce certain values to inforce that our props are of the type we expect them to be. 
+We also have a better way to handle props. 
+This is useful if your code is handeled by other devs. 
+- We can inforce certain values to inforce that our props are of the type we expect them to be. 
 
-For example, if a value should be boolean - we won't want anyone to pass in anything but a bool value. 
-We want to check the types of the incoming properties to make sure we're using it correctly. 
+For example, if a value should be boolean 
+- we won't want anyone to pass in anything but a bool value. 
+- We want to check the types of the incoming properties to make sure we're using it correctly. 
 
 For that, there's an extra package we can add to our react app. 
 
@@ -750,7 +778,8 @@ componentDidMount() {
 }	
 ```
 
-Inside the method we're checking the position is 0, and if so - we're calling the focus method. 
+Inside the method we're checking the position is 0, and if so 
+- we're calling the focus method. 
 
 This should be used for a few selected things, like focus or media playback. 
 
@@ -771,11 +800,11 @@ There's now an easier way to implement the focus and creating references.
 
 ```javascript
 componentDidMount() {
-console.log('[Person.js] Inside componentDidMount');
-if (this.props.position === 0) {
-	//add 'current' property to the path
-	this.inputElement.current.focus();
-}
+	console.log('[Person.js] Inside componentDidMount');
+	if (this.props.position === 0) {
+		//add 'current' property to the path
+		this.inputElement.current.focus();
+	}
 }	
 ```
 
@@ -784,6 +813,7 @@ React 16.3 also supports forwarded reference.
 - This is helpful for working with wrapper components. 
 
 The new context api is a great tool for **passing global state** around in our app. 
+
 We sometimes have some global state, like the authentication status. 
 Passing down the value is an option, but we can use the authentication api to make this easier. 
 
@@ -791,7 +821,7 @@ Passing down the value is an option, but we can use the authentication api to ma
 
 ### Updated lifecycle hooks ([React 16.3](https://reactjs.org/blog/2018/03/29/react-v-16-3.html))
 
-Lifecycle methods to avoid: `componentWillMount`, `componentWillUpdates`, `componentWillReceiveProps`. 
+Lifecycle methods to avoid: `componentWillMount`, `componentWillUpdate`, `componentWillReceiveProps`. 
 - They are discouraged because they were often used incorrectly. 
 - We'll rarely use these three. 
 
@@ -804,10 +834,10 @@ React offers two new lifecycle hooks:
 	```javascript
 	static getDerivedStateFromProps(nextProps, prevState) {
 		console.log(
-		"[UPDATE App.js] Inside getDerivedStateFromProps",
-		nextProps,
-		prevState
-	);
+			"[UPDATE App.js] Inside getDerivedStateFromProps",
+			nextProps,
+			prevState
+	)};
 	```
 
 	- `getDerivedStateFromProps` is called before `render()` and `didMount`. 
